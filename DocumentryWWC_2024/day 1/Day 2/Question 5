@@ -1,0 +1,191 @@
+Design a train reservation system in C++ using linked lists to manage bookings for multiple trains, each with several compartments. Each compartment has a fixed number of seats, and passengers can book, cancel, or check the availability of seats for specific compartments. Additionally, the system should dynamically allocate memory for new bookings and keep track of canceled seats efficiently
+
+#include <iostream>
+#include <string>
+#include <vector>
+
+struct Compartment {
+    int compartmentNumber;
+    int totalSeats;
+    int availableSeats;
+    Compartment* next;
+
+    Compartment(int num, int seats)
+        : compartmentNumber(num), totalSeats(seats), availableSeats(seats), next(nullptr) {}
+};
+
+struct Train {
+    int trainID;
+    std::string trainName;
+    Compartment* compartments;
+    Train* next;
+
+    Train(int id, const std::string& name)
+        : trainID(id), trainName(name), compartments(nullptr), next(nullptr) {}
+};
+
+class TrainReservationSystem {
+private:
+    Train* head;
+
+public:
+    TrainReservationSystem() : head(nullptr) {}
+
+    // Add a new train
+    void addTrain(int trainID, const std::string& trainName) {
+        Train* newTrain = new Train(trainID, trainName);
+        newTrain->next = head;
+        head = newTrain;
+    }
+
+    // Add a compartment to a specific train
+    void addCompartment(int trainID, int compartmentNumber, int totalSeats) {
+        Train* train = findTrain(trainID);
+        if (!train) {
+            std::cout << "Train with ID " << trainID << " not found.\n";
+            return;
+        }
+
+        Compartment* newCompartment = new Compartment(compartmentNumber, totalSeats);
+        newCompartment->next = train->compartments;
+        train->compartments = newCompartment;
+    }
+
+    // Book seats in a compartment
+    void bookSeats(int trainID, int compartmentNumber, int seats) {
+        Compartment* compartment = findCompartment(trainID, compartmentNumber);
+        if (!compartment) {
+            std::cout << "Compartment not found.\n";
+            return;
+        }
+
+        if (compartment->availableSeats >= seats) {
+            compartment->availableSeats -= seats;
+            std::cout << "Successfully booked " << seats << " seats in Compartment " << compartmentNumber
+                      << " of Train " << trainID << ".\n";
+        } else {
+            std::cout << "Not enough seats available.\n";
+        }
+    }
+
+    // Cancel seats in a compartment
+    void cancelSeats(int trainID, int compartmentNumber, int seats) {
+        Compartment* compartment = findCompartment(trainID, compartmentNumber);
+        if (!compartment) {
+            std::cout << "Compartment not found.\n";
+            return;
+        }
+
+        if (compartment->availableSeats + seats <= compartment->totalSeats) {
+            compartment->availableSeats += seats;
+            std::cout << "Successfully canceled " << seats << " seats in Compartment " << compartmentNumber
+                      << " of Train " << trainID << ".\n";
+        } else {
+            std::cout << "Cancellation exceeds total seats available.\n";
+        }
+    }
+
+    // Check seat availability
+    void checkAvailability(int trainID, int compartmentNumber) {
+        Compartment* compartment = findCompartment(trainID, compartmentNumber);
+        if (!compartment) {
+            std::cout << "Compartment not found.\n";
+            return;
+        }
+
+        std::cout << "Compartment " << compartmentNumber << " of Train " << trainID
+                  << " has " << compartment->availableSeats << " seats available out of "
+                  << compartment->totalSeats << " total seats.\n";
+    }
+
+    // Display train and compartment details
+    void displayTrains() {
+        if (!head) {
+            std::cout << "No trains available.\n";
+            return;
+        }
+
+        Train* currentTrain = head;
+        while (currentTrain) {
+            std::cout << "Train ID: " << currentTrain->trainID
+                      << ", Train Name: " << currentTrain->trainName << "\n";
+
+            Compartment* currentCompartment = currentTrain->compartments;
+            while (currentCompartment) {
+                std::cout << "  Compartment " << currentCompartment->compartmentNumber
+                          << ": " << currentCompartment->availableSeats << " / "
+                          << currentCompartment->totalSeats << " seats available\n";
+                currentCompartment = currentCompartment->next;
+            }
+
+            currentTrain = currentTrain->next;
+        }
+    }
+
+    // Destructor to free memory
+    ~TrainReservationSystem() {
+        while (head) {
+            Train* trainToDelete = head;
+            head = head->next;
+
+            while (trainToDelete->compartments) {
+                Compartment* compartmentToDelete = trainToDelete->compartments;
+                trainToDelete->compartments = trainToDelete->compartments->next;
+                delete compartmentToDelete;
+            }
+
+            delete trainToDelete;
+        }
+    }
+
+private:
+    // Find train by ID
+    Train* findTrain(int trainID) {
+        Train* current = head;
+        while (current) {
+            if (current->trainID == trainID) return current;
+            current = current->next;
+        }
+        return nullptr;
+    }
+
+    // Find compartment by train ID and compartment number
+    Compartment* findCompartment(int trainID, int compartmentNumber) {
+        Train* train = findTrain(trainID);
+        if (!train) return nullptr;
+
+        Compartment* current = train->compartments;
+        while (current) {
+            if (current->compartmentNumber == compartmentNumber) return current;
+            current = current->next;
+        }
+        return nullptr;
+    }
+};
+
+int main() {
+    TrainReservationSystem system;
+
+    // Add trains
+    system.addTrain(1, "Express");
+    system.addTrain(2, "Local");
+
+    // Add compartments
+    system.addCompartment(1, 101, 50);
+    system.addCompartment(1, 102, 30);
+    system.addCompartment(2, 201, 40);
+
+    // Display train details
+    system.displayTrains();
+
+    // Book and cancel seats
+    system.bookSeats(1, 101, 10);
+    system.cancelSeats(1, 101, 5);
+    system.checkAvailability(1, 101);
+
+    // Display updated train details
+    std::cout << "\nUpdated Train Details:\n";
+    system.displayTrains();
+
+    return 0;
+}
