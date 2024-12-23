@@ -1,0 +1,109 @@
+Design a system in C++ that uses a linked list to simulate a real-time task scheduler for a multi-threaded operating system. Each node in the linked list represents a task, containing attributes like a unique task ID, task priority, estimated execution time, and a pointer to the next task. The linked list must dynamically adapt to new tasks being added, tasks completing, or tasks being pre-empted based on their priority. Implement functionality to insert tasks into the list in priority order (higher priority tasks come first), remove tasks upon completion, and dynamically reallocate execution slots if a higher priority task is added mid-execution. Additionally, the system should support a circular linked list to handle periodic tasks that need to re-enter the scheduling queue after a defined time interval. The implementation must ensure efficient memory usage and handle edge cases, such as managing tasks with the same priority, handling an empty task queue, and dealing with corrupted nodes. The program should output the current state of the task list, showing the order of execution and periodically updating it as tasks are added, completed, or preempted in real-time. This problem challenges your understanding of advanced linked list manipulation, dynamic memory management, and multi-threaded system simulation.
+
+#include <iostream>
+#include <string>
+#include <thread>
+#include <chrono>
+
+struct Task {
+    int id;
+    int priority;
+    int executionTime; // in seconds
+    Task* next;
+
+    Task(int taskId, int taskPriority, int taskExecutionTime)
+        : id(taskId), priority(taskPriority), executionTime(taskExecutionTime), next(nullptr) {}
+};
+
+class TaskScheduler {
+private:
+    Task* head;
+
+public:
+    TaskScheduler() : head(nullptr) {}
+
+    // Insert task in priority order (higher priority first)
+    void addTask(int id, int priority, int executionTime) {
+        Task* newTask = new Task(id, priority, executionTime);
+
+        // Insert into an empty list
+        if (!head || priority > head->priority) {
+            newTask->next = head;
+            head = newTask;
+            return;
+        }
+
+        // Find the correct position
+        Task* current = head;
+        while (current->next && current->next->priority >= priority) {
+            current = current->next;
+        }
+        newTask->next = current->next;
+        current->next = newTask;
+    }
+
+    // Remove completed task
+    void removeTask() {
+        if (!head) {
+            std::cout << "No tasks to remove.\n";
+            return;
+        }
+        Task* toDelete = head;
+        head = head->next;
+        std::cout << "Task " << toDelete->id << " completed.\n";
+        delete toDelete;
+    }
+
+    // Simulate task execution and preemption
+    void executeTasks() {
+        while (head) {
+            std::cout << "Executing Task ID: " << head->id
+                      << " | Priority: " << head->priority
+                      << " | Time: " << head->executionTime << "s\n";
+
+            std::this_thread::sleep_for(std::chrono::seconds(head->executionTime));
+            removeTask();
+        }
+        std::cout << "All tasks completed.\n";
+    }
+
+    // Display current task queue
+    void displayTasks() {
+        if (!head) {
+            std::cout << "No tasks in the queue.\n";
+            return;
+        }
+        std::cout << "Current Task Queue:\n";
+        Task* current = head;
+        while (current) {
+            std::cout << "Task ID: " << current->id
+                      << " | Priority: " << current->priority
+                      << " | Execution Time: " << current->executionTime << "s\n";
+            current = current->next;
+        }
+    }
+
+    ~TaskScheduler() {
+        while (head) {
+            removeTask();
+        }
+    }
+};
+
+int main() {
+    TaskScheduler scheduler;
+
+    // Add tasks
+    scheduler.addTask(1, 2, 3); // ID: 1, Priority: 2, Execution Time: 3 seconds
+    scheduler.addTask(2, 1, 5); // ID: 2, Priority: 1, Execution Time: 5 seconds
+    scheduler.addTask(3, 3, 2); // ID: 3, Priority: 3, Execution Time: 2 seconds
+
+    // Display tasks
+    scheduler.displayTasks();
+
+    // Execute tasks
+    std::cout << "\nStarting task execution...\n";
+    scheduler.executeTasks();
+
+    return 0;
+}
