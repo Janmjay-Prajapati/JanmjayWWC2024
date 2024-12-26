@@ -1,0 +1,69 @@
+Hospital Resource Allocation
+A hospital management system needs to sort incoming patients in the emergency department based on triage priority, severity of condition, and arrival time. The sorted list determines the order in which patients are seen by medical professionals. Additionally, during peak times, the system must dynamically adjust the sorting as new patients arrive, ensuring that life-threatening cases are prioritized while maintaining fairness.
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+
+// Define a structure to represent a patient
+struct Patient {
+    std::string name;        // Patient's name
+    int triagePriority;      // Triage priority (1: highest, 5: lowest)
+    int severity;            // Severity of condition (1-10 scale)
+    std::string arrivalTime; // Arrival time in HH:MM format
+
+    // Constructor
+    Patient(std::string n, int priority, int sev, std::string time)
+        : name(n), triagePriority(priority), severity(sev), arrivalTime(time) {}
+};
+
+// Comparator for sorting patients dynamically
+bool comparePatients(const Patient &p1, const Patient &p2) {
+    if (p1.triagePriority != p2.triagePriority)
+        return p1.triagePriority < p2.triagePriority; // Higher priority first
+    if (p1.severity != p2.severity)
+        return p1.severity > p2.severity; // Higher severity first
+    return p1.arrivalTime < p2.arrivalTime; // Earlier arrival first
+}
+
+int main() {
+    // Example dataset of patients
+    std::vector<Patient> patients = {
+        {"John Doe", 2, 8, "09:30"},
+        {"Jane Smith", 1, 10, "09:35"},
+        {"Bob Brown", 3, 5, "09:25"},
+        {"Alice White", 1, 9, "09:40"},
+        {"Tom Green", 2, 7, "09:20"}
+    };
+
+    // Initial sorting of patients
+    std::sort(patients.begin(), patients.end(), comparePatients);
+
+    // Display sorted patient list
+    std::cout << "Initial Patient Queue:\n";
+    for (const auto &patient : patients) {
+        std::cout << "Name: " << patient.name
+                  << ", Priority: " << patient.triagePriority
+                  << ", Severity: " << patient.severity
+                  << ", Arrival Time: " << patient.arrivalTime << "\n";
+    }
+
+    // Example of dynamically adding a new patient
+    std::cout << "\nAdding a new patient dynamically:\n";
+    patients.emplace_back("Emma Black", 1, 10, "09:45");
+
+    // Re-sort patients dynamically
+    std::sort(patients.begin(), patients.end(), comparePatients);
+
+    // Display updated patient list
+    std::cout << "\nUpdated Patient Queue:\n";
+    for (const auto &patient : patients) {
+        std::cout << "Name: " << patient.name
+                  << ", Priority: " << patient.triagePriority
+                  << ", Severity: " << patient.severity
+                  << ", Arrival Time: " << patient.arrivalTime << "\n";
+    }
+
+    return 0;
+}
