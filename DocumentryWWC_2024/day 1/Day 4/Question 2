@@ -1,0 +1,69 @@
+Stock Market Data Analysis
+A financial technology company needs to process real-time stock market data consisting of millions of trades every minute. Each trade record includes the timestamp, stock symbol, trade price, and trade volume. To identify patterns and generate analytics, the trades must be sorted by timestamp. For deeper insights, the company also requires sorting by stock symbol and grouping by trading volume trends. Handling this large-scale data efficiently is crucial for providing timely analytics to clients.
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <map>
+
+// Define a structure to represent a trade
+struct Trade {
+    std::string timestamp;  // Trade timestamp
+    std::string stockSymbol; // Stock symbol
+    double tradePrice;      // Trade price
+    int tradeVolume;        // Trade volume
+
+    // Constructor
+    Trade(std::string ts, std::string symbol, double price, int volume)
+        : timestamp(ts), stockSymbol(symbol), tradePrice(price), tradeVolume(volume) {}
+};
+
+// Comparator for sorting trades by timestamp
+bool compareByTimestamp(const Trade &t1, const Trade &t2) {
+    return t1.timestamp < t2.timestamp;
+}
+
+// Comparator for sorting trades by stock symbol
+bool compareByStockSymbol(const Trade &t1, const Trade &t2) {
+    return t1.stockSymbol < t2.stockSymbol;
+}
+
+int main() {
+    // Example dataset of trades
+    std::vector<Trade> trades = {
+        {"2024-12-24T09:30:00", "AAPL", 175.5, 100},
+        {"2024-12-24T09:31:00", "GOOG", 2840.3, 50},
+        {"2024-12-24T09:32:00", "AAPL", 176.0, 150},
+        {"2024-12-24T09:33:00", "MSFT", 305.2, 200},
+        {"2024-12-24T09:30:30", "GOOG", 2842.1, 70}
+    };
+
+    // Sorting trades by timestamp
+    std::sort(trades.begin(), trades.end(), compareByTimestamp);
+
+    // Display trades sorted by timestamp
+    std::cout << "Trades sorted by timestamp:\n";
+    for (const auto &trade : trades) {
+        std::cout << "Timestamp: " << trade.timestamp
+                  << ", Symbol: " << trade.stockSymbol
+                  << ", Price: " << trade.tradePrice
+                  << ", Volume: " << trade.tradeVolume << "\n";
+    }
+
+    // Sorting trades by stock symbol
+    std::sort(trades.begin(), trades.end(), compareByStockSymbol);
+
+    // Grouping trades by stock symbol and analyzing volume trends
+    std::map<std::string, int> volumeBySymbol;
+    for (const auto &trade : trades) {
+        volumeBySymbol[trade.stockSymbol] += trade.tradeVolume;
+    }
+
+    // Display grouped trade volumes by stock symbol
+    std::cout << "\nTrade volumes grouped by stock symbol:\n";
+    for (const auto &entry : volumeBySymbol) {
+        std::cout << "Symbol: " << entry.first << ", Total Volume: " << entry.second << "\n";
+    }
+
+    return 0;
+}
