@@ -1,0 +1,52 @@
+Scheduling Ads for a Social Media Platform
+A social media platform runs advertisements for multiple advertisers, each targeting specific user demographics. Ads are prioritized based on factors like bid amount, engagement rates, and the remaining budget. To maximize revenue and user satisfaction, the platform must sort and schedule ads in real-time for millions of users while balancing competing priorities. Efficient sorting directly impacts ad visibility and revenue generation.
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+
+// Define a structure to represent an ad
+struct Ad {
+    std::string advertiserName; // Name of the advertiser
+    double bidAmount;           // Bid amount per impression
+    double engagementRate;      // Engagement rate as a percentage
+    double remainingBudget;     // Remaining budget for the advertiser
+
+    // Constructor
+    Ad(std::string name, double bid, double engagement, double budget)
+        : advertiserName(name), bidAmount(bid), engagementRate(engagement), remainingBudget(budget) {}
+};
+
+// Comparator for sorting ads by priority
+bool compareAds(const Ad &ad1, const Ad &ad2) {
+    // Calculate priority scores based on bid amount, engagement rate, and remaining budget
+    double score1 = ad1.bidAmount * 0.5 + ad1.engagementRate * 0.3 + ad1.remainingBudget * 0.2;
+    double score2 = ad2.bidAmount * 0.5 + ad2.engagementRate * 0.3 + ad2.remainingBudget * 0.2;
+    return score1 > score2; // Higher score comes first
+}
+
+int main() {
+    // Example dataset of ads
+    std::vector<Ad> ads = {
+        {"Advertiser A", 5.0, 12.5, 1000.0},
+        {"Advertiser B", 4.5, 15.0, 1200.0},
+        {"Advertiser C", 6.0, 10.0, 800.0},
+        {"Advertiser D", 4.0, 18.0, 900.0},
+        {"Advertiser E", 5.5, 11.0, 1100.0}
+    };
+
+    // Sort ads by priority
+    std::sort(ads.begin(), ads.end(), compareAds);
+
+    // Display sorted ads
+    std::cout << "Scheduled Ads:\n";
+    for (const auto &ad : ads) {
+        std::cout << "Advertiser: " << ad.advertiserName
+                  << ", Bid: " << ad.bidAmount
+                  << ", Engagement Rate: " << ad.engagementRate << "%"
+                  << ", Remaining Budget: " << ad.remainingBudget << "\n";
+    }
+
+    return 0;
+}
