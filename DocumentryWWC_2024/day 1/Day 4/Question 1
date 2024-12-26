@@ -1,0 +1,52 @@
+Fraud Detection in Banking Transactions
+A banking institution monitors transactions for potential fraud by analyzing patterns in transaction size, frequency, and geographical location. The transactions are sorted by suspiciousness score, calculated using a combination of these factors. High-risk transactions are flagged for immediate review by analysts, requiring a robust and scalable sorting mechanism to handle millions of records daily.
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+// Define a structure to represent a transaction
+struct Transaction {
+    int id;                       // Unique transaction ID
+    double amount;                // Transaction amount
+    int frequency;                // Frequency of transactions from the user
+    std::string location;         // Geographical location
+    double suspiciousnessScore;   // Suspiciousness score
+
+    // Constructor
+    Transaction(int id, double amount, int frequency, std::string location, double score)
+        : id(id), amount(amount), frequency(frequency), location(location), suspiciousnessScore(score) {}
+};
+
+// Comparator function for sorting transactions by suspiciousness score in descending order
+bool compareTransactions(const Transaction &t1, const Transaction &t2) {
+    return t1.suspiciousnessScore > t2.suspiciousnessScore;
+}
+
+int main() {
+    // Example dataset of transactions
+    std::vector<Transaction> transactions = {
+        {1, 1000.0, 5, "New York", 85.5},
+        {2, 5000.0, 2, "Los Angeles", 95.2},
+        {3, 200.0, 10, "Chicago", 70.3},
+        {4, 7500.0, 1, "Houston", 99.8},
+        {5, 1200.0, 7, "Miami", 80.0}
+    };
+
+    // Sort transactions by suspiciousness score
+    std::sort(transactions.begin(), transactions.end(), compareTransactions);
+
+    // Display high-risk transactions (e.g., suspiciousnessScore > 90.0)
+    std::cout << "High-Risk Transactions:\n";
+    for (const auto &transaction : transactions) {
+        if (transaction.suspiciousnessScore > 90.0) {
+            std::cout << "ID: " << transaction.id
+                      << ", Amount: " << transaction.amount
+                      << ", Frequency: " << transaction.frequency
+                      << ", Location: " << transaction.location
+                      << ", Score: " << transaction.suspiciousnessScore << "\n";
+        }
+    }
+
+    return 0;
+}
