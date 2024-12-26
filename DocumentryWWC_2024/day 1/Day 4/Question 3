@@ -1,0 +1,75 @@
+Video Streaming Platform Recommendation System
+A video streaming platform generates recommendations for users based on the popularity of movies and TV shows. Each item in the catalog has attributes like total views, user ratings, and release year. The system must sort the catalog to prioritize trending content by combining popularity and recency. Furthermore, personalized recommendations require sorting by relevance to each user's viewing history, making the sorting process dynamic and computationally intensive.
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <cmath> // For custom scoring formula
+
+// Define a structure to represent a catalog item
+struct CatalogItem {
+    std::string title;        // Movie or TV show title
+    int totalViews;           // Total views
+    double userRating;        // Average user rating
+    int releaseYear;          // Release year
+    double relevanceScore;    // Custom score for personalized recommendations
+
+    // Constructor
+    CatalogItem(std::string t, int views, double rating, int year, double score = 0.0)
+        : title(t), totalViews(views), userRating(rating), releaseYear(year), relevanceScore(score) {}
+};
+
+// Comparator for sorting by trending score (popularity and recency)
+bool compareByTrending(const CatalogItem &item1, const CatalogItem &item2) {
+    double score1 = item1.totalViews * 0.7 + item1.userRating * 0.2 + (2024 - item1.releaseYear) * 0.1;
+    double score2 = item2.totalViews * 0.7 + item2.userRating * 0.2 + (2024 - item2.releaseYear) * 0.1;
+    return score1 > score2;
+}
+
+// Comparator for sorting by relevance score
+bool compareByRelevance(const CatalogItem &item1, const CatalogItem &item2) {
+    return item1.relevanceScore > item2.relevanceScore;
+}
+
+int main() {
+    // Example dataset of catalog items
+    std::vector<CatalogItem> catalog = {
+        {"Movie A", 500000, 4.5, 2023},
+        {"Show B", 300000, 4.8, 2022},
+        {"Movie C", 800000, 4.2, 2020},
+        {"Show D", 200000, 4.7, 2024},
+        {"Movie E", 600000, 4.1, 2021}
+    };
+
+    // Sort catalog by trending score
+    std::sort(catalog.begin(), catalog.end(), compareByTrending);
+
+    // Display trending content
+    std::cout << "Trending Content:\n";
+    for (const auto &item : catalog) {
+        std::cout << "Title: " << item.title
+                  << ", Views: " << item.totalViews
+                  << ", Rating: " << item.userRating
+                  << ", Release Year: " << item.releaseYear << "\n";
+    }
+
+    // Example of personalized relevance scores
+    catalog[0].relevanceScore = 9.5;
+    catalog[1].relevanceScore = 8.2;
+    catalog[2].relevanceScore = 7.8;
+    catalog[3].relevanceScore = 6.5;
+    catalog[4].relevanceScore = 8.9;
+
+    // Sort catalog by relevance score
+    std::sort(catalog.begin(), catalog.end(), compareByRelevance);
+
+    // Display personalized recommendations
+    std::cout << "\nPersonalized Recommendations:\n";
+    for (const auto &item : catalog) {
+        std::cout << "Title: " << item.title
+                  << ", Relevance Score: " << item.relevanceScore << "\n";
+    }
+
+    return 0;
+}
